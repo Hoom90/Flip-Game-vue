@@ -1,0 +1,11 @@
+@font-face {
+    font-family: vazirmtn;
+    src: url('./assets/font/Vazirmatn-VariableFont_wght.ttf');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: vazirmtn;
+    direction: rtl;
+}
