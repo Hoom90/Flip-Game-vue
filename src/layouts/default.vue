@@ -14,12 +14,12 @@
   height: 90vh;
   max-width: 450px;
   margin: 0 auto;
-  padding: 50px 0 0 0;
 }
 
 .navigation {
   display: flex;
   gap: 10px;
+  padding: 20px 0;
 }
 
 .navigation button {
@@ -28,7 +28,7 @@
 }
 
 .wrapper {
-  padding: 20px 0 0 0;
+  padding: 10px;
 }
 </style>
 
