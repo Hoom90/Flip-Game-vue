@@ -37,6 +37,10 @@ const state = reactive({
     match: 0,
     timer: defTimer,
     movesCounter: defMoverCounter,
+    dialog: false,
+    isWin: false,
+    isTimeout: true,
+    isOutMove: false
 })
 onMounted(() => {
     shuffle()
@@ -93,36 +97,33 @@ const addCard = (card, cardHTML, pos) => {
 
 const testCards = (card1, html1, x1, card2, html2, x2) => {
     if (card1 === card2 && x1 != x2) cardsMatch();
-    else cardsDontMatch();
+    else cardsDontMatch(html1, html2);
 }
 
 const cardsMatch = () => {
     state.match++;
     if (state.match === 8) {
         console.log('victory');
+        state.dialog = true
+        state.isWin = true
         clearInterval(state.timerID);
     }
 }
 
-const cardsDontMatch = () => {
+const cardsDontMatch = (card1, card2) => {
     setTimeout(function () {
         card1.classList.toggle('card-rotate');
         card2.classList.toggle('card-rotate');
     }, 300);
 }
 
-// const win = () => {
-//     clearInterval(state.timerID);
-//     const stats = document.querySelector(".stats");
-//     if (s % 60 < 10) {
-//         stats.textContent = "You won with: " + stars + " stars in " + movesCounter + " moves with time: " + m + ":0" + s % 60;
-//     } else {
-//         stats.textContent = "You won with: " + stars + " stars in " + movesCounter + " moves with time: " + m + ":" + s % 60;
-//     }
-// }
-
 const updateMoveCounter = () => {
     state.movesCounter--;
+    if (state.movesCounter < 0) {
+        console.log('out of move');
+        state.dialog = true
+        state.isOutMove = true
+    }
 }
 
 let s = defTimer;
@@ -137,29 +138,33 @@ const timer = () => {
     --s;
     if (s < 0) {
         console.log('time out');
+        state.dialog = true
+        state.isTimeout = true
         clearInterval(state.timerID);
     }
 }
 
-// const restartGame = () => {
-//     clearInterval(timerID);
-//     movesCounter = 0;
-//     match = 0;
-//     s = 0;
-//     m = 0;
-//     isfirstClick = true;
-//     isRestart = true;
-//     const deck = document.querySelector('.deck');
-//     var elements = deck.getElementsByClassName("card");
-
-//     while (elements[0]) {
-//         elements[0].parentNode.removeChild(elements[0]);
-//     }
-//     shuffledCards = shuffle(cards);
-//     let timer = document.querySelector(".timer");
-//     state.timer = defTimer
-//     state.movesCounter = defMoverCounter
-// }
+const restartGame = () => {
+    clearInterval(state.timerID);
+    state.movesCounter = defMoverCounter;
+    state.match = 0;
+    state.dialog = false
+    state.isWin = false
+    state.isTimeout = false
+    state.isOutMove = false
+    s = defTimer;
+    m = 0;
+    state.isfirstClick = true;
+    state.isRestart = true;
+    const cardsHtml = cardContainer.value
+    for (let item of cardsHtml.children) {
+        item.classList.remove('card-rotate')
+    }
+    setTimeout(() => {
+        shuffle();
+        timer()
+    }, 500)
+}
 
 </script>
 <template>
@@ -180,10 +185,57 @@ const timer = () => {
         </div>
     </div>
     <div class="footer">
-        <button>شروع دوباره</button>
+        <button @click="restartGame">شروع دوباره</button>
+    </div>
+    <div v-if="state.dialog" class="dialog">
+        <div class="wrapper">
+            <div class="wrapper-body">
+                <template v-if="state.isWin">هورا! تو بردی!!! :)</template>
+                <template v-if="state.isOutMove">حرکت هات که تموم شد.... :(</template>
+                <template v-if="state.isTimeout">آخ آخ آخ زمان تموم شد...</template>
+            </div>
+            <div class="wrapper-footer">
+                <button @click="restartGame">شروع دوباره</button>
+            </div>
+        </div>
     </div>
 </template>
 <style scoped>
+.wrapper-body {
+    height: 80%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wrapper-footer {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+}
+
+.dialog {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #00000050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wrapper {
+    width: 400px;
+    height: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 5px #fff;
+    padding: 10px;
+}
+
 button {
     border-radius: 5px;
     border: none;
